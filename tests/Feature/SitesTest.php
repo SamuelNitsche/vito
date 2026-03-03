@@ -622,7 +622,6 @@ class SitesTest extends TestCase
             'user' => 'laraveldb',
             'database_name' => 'laravel_db',
             'database_user_name' => 'laravel_user',
-            'database_user_password' => 'secret123',
         ])
             ->assertSessionDoesntHaveErrors();
 

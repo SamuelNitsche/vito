@@ -8,6 +8,7 @@ use App\Exceptions\SSHError;
 use App\Models\Site;
 use App\Services\Database\Postgresql;
 use Closure;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class Laravel extends PHPSite
@@ -43,10 +44,6 @@ class Laravel extends PHPSite
             'alpha_dash',
             $hasDatabaseName ? Rule::unique('database_users', 'username')->where('server_id', $this->site->server_id)->whereNull('deleted_at') : '',
         ];
-        $rules['database_user_password'] = [
-            $hasDatabaseName ? 'required' : 'nullable',
-            'min:6',
-        ];
 
         return $rules;
     }
@@ -58,7 +55,7 @@ class Laravel extends PHPSite
         if (! empty($input['database_name'])) {
             $data['database_name'] = $input['database_name'];
             $data['database_user_name'] = $input['database_user_name'];
-            $data['database_user_password'] = $input['database_user_password'];
+            $data['database_user_password'] = Str::password(16);
         }
 
         return $data;
