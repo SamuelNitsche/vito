@@ -116,12 +116,12 @@ class SiteTypeServiceProvider extends ServiceProvider
                     ->text()
                     ->label('Database Name')
                     ->placeholder('e.g. my_laravel_db')
-                    ->description('Optional. If provided, a database and user will be created automatically.'),
-                DynamicField::make('database_user_name')
-                    ->text()
+                    ->description('Optional. If provided, a database will be created and linked to the selected user.'),
+                DynamicField::make('database_user')
+                    ->component()
                     ->label('Database User')
-                    ->placeholder('e.g. my_laravel_user')
-                    ->description('Required if database name is provided. Password is auto-generated.'),
+                    ->description('Select or create a database user. Required if database name is provided.')
+                    ->componentProps(['create' => true]),
             ]))
             ->register();
         RegisterSiteFeature::make(Laravel::id(), 'modern-deployment')

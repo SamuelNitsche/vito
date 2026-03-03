@@ -5,10 +5,10 @@ namespace App\SiteTypes;
 use App\Actions\Database\CreateDatabase;
 use App\Actions\Site\UpdateEnv;
 use App\Exceptions\SSHError;
+use App\Models\DatabaseUser;
 use App\Models\Site;
 use App\Services\Database\Postgresql;
 use Closure;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class Laravel extends PHPSite
@@ -39,10 +39,9 @@ class Laravel extends PHPSite
             },
             $hasDatabaseName ? Rule::unique('databases', 'name')->where('server_id', $this->site->server_id)->whereNull('deleted_at') : '',
         ];
-        $rules['database_user_name'] = [
+        $rules['database_user'] = [
             $hasDatabaseName ? 'required' : 'nullable',
-            'alpha_dash',
-            $hasDatabaseName ? Rule::unique('database_users', 'username')->where('server_id', $this->site->server_id)->whereNull('deleted_at') : '',
+            $hasDatabaseName ? Rule::exists('database_users', 'id')->where('server_id', $this->site->server_id) : '',
         ];
 
         return $rules;
@@ -54,8 +53,7 @@ class Laravel extends PHPSite
 
         if (! empty($input['database_name'])) {
             $data['database_name'] = $input['database_name'];
-            $data['database_user_name'] = $input['database_user_name'];
-            $data['database_user_password'] = Str::password(16);
+            $data['database_user'] = $input['database_user'];
         }
 
         return $data;
@@ -114,8 +112,8 @@ class Laravel extends PHPSite
             'name' => $this->site->type_data['database_name'],
             'charset' => $charset,
             'collation' => $collation,
-            'username' => $this->site->type_data['database_user_name'],
-            'password' => $this->site->type_data['database_user_password'],
+            'user' => true,
+            'existing_user_id' => $this->site->type_data['database_user'],
         ]);
     }
 
@@ -135,6 +133,7 @@ class Laravel extends PHPSite
         $env = $this->site->getEnv();
         if ($env) {
             $databaseHandler = $this->site->server->database()->handler();
+            $databaseUser = DatabaseUser::findOrFail($this->site->type_data['database_user']);
 
             $connection = 'mysql';
             $port = '3306';
@@ -147,8 +146,8 @@ class Laravel extends PHPSite
             $env = $this->setEnvValue($env, 'DB_HOST', '127.0.0.1');
             $env = $this->setEnvValue($env, 'DB_PORT', $port);
             $env = $this->setEnvValue($env, 'DB_DATABASE', $this->site->type_data['database_name']);
-            $env = $this->setEnvValue($env, 'DB_USERNAME', $this->site->type_data['database_user_name']);
-            $env = $this->setEnvValue($env, 'DB_PASSWORD', $this->site->type_data['database_user_password']);
+            $env = $this->setEnvValue($env, 'DB_USERNAME', $databaseUser->username);
+            $env = $this->setEnvValue($env, 'DB_PASSWORD', $databaseUser->password);
 
             app(UpdateEnv::class)->update($this->site, ['env' => $env]);
         }

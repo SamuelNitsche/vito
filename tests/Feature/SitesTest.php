@@ -609,6 +609,11 @@ class SitesTest extends TestCase
             'provider' => Github::id(),
         ]);
 
+        /** @var DatabaseUser $databaseUser */
+        $databaseUser = DatabaseUser::factory()->create([
+            'server_id' => $this->server->id,
+        ]);
+
         $this->post(route('sites.store', ['server' => $this->server]), [
             'type' => Laravel::id(),
             'domain' => 'laravel-db.com',
@@ -621,7 +626,7 @@ class SitesTest extends TestCase
             'composer' => true,
             'user' => 'laraveldb',
             'database_name' => 'laravel_db',
-            'database_user_name' => 'laravel_user',
+            'database_user' => $databaseUser->id,
         ])
             ->assertSessionDoesntHaveErrors();
 
@@ -633,11 +638,6 @@ class SitesTest extends TestCase
         $this->assertDatabaseHas('databases', [
             'server_id' => $this->server->id,
             'name' => 'laravel_db',
-        ]);
-
-        $this->assertDatabaseHas('database_users', [
-            'server_id' => $this->server->id,
-            'username' => 'laravel_user',
         ]);
     }
 

@@ -15,7 +15,7 @@ class CreateLaravelSite extends CreateSite
             'web_directory' => 'public',
             'composer' => 'whether to run composer install (true/false, optional)',
             'database_name' => 'Database name to create (optional)',
-            'database_user_name' => 'Database username to create (required if database_name is provided, password is auto-generated)',
+            'database_user' => 'Database user ID to link (required if database_name is provided)',
         ]);
     }
 }

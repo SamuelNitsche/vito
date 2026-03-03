@@ -193,7 +193,7 @@ export default function CreateSite({
             value={form.data.database_user}
             /*@ts-expect-error dynamic types*/
             onValueChange={(value) => form.setData('database_user', value)}
-            create={false}
+            create={field.componentProps?.create !== undefined ? (field.componentProps.create as boolean) : false}
           />
           {/*@ts-expect-error dynamic types*/}
           <InputError message={form.errors.database_user} />
