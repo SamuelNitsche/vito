@@ -593,6 +593,55 @@ class SitesTest extends TestCase
         ];
     }
 
+    public function test_create_laravel_site_with_database(): void
+    {
+        SSH::fake();
+
+        Http::fake([
+            'https://api.github.com/repos/*' => Http::response([
+            ], 201),
+        ]);
+
+        $this->actingAs($this->user);
+
+        /** @var SourceControl $sourceControl */
+        $sourceControl = SourceControl::factory()->create([
+            'provider' => Github::id(),
+        ]);
+
+        $this->post(route('sites.store', ['server' => $this->server]), [
+            'type' => Laravel::id(),
+            'domain' => 'laravel-db.com',
+            'aliases' => [],
+            'php_version' => '8.2',
+            'web_directory' => 'public',
+            'source_control' => $sourceControl->id,
+            'repository' => 'test/test',
+            'branch' => 'main',
+            'composer' => true,
+            'user' => 'laraveldb',
+            'database_name' => 'laravel_db',
+            'database_user_name' => 'laravel_user',
+            'database_user_password' => 'secret123',
+        ])
+            ->assertSessionDoesntHaveErrors();
+
+        $this->assertDatabaseHas('sites', [
+            'domain' => 'laravel-db.com',
+            'status' => SiteStatus::READY->value,
+        ]);
+
+        $this->assertDatabaseHas('databases', [
+            'server_id' => $this->server->id,
+            'name' => 'laravel_db',
+        ]);
+
+        $this->assertDatabaseHas('database_users', [
+            'server_id' => $this->server->id,
+            'username' => 'laravel_user',
+        ]);
+    }
+
     /**
      * @return array<array<array<string, mixed>>>
      */

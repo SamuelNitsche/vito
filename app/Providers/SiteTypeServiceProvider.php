@@ -112,6 +112,20 @@ class SiteTypeServiceProvider extends ServiceProvider
                     ->checkbox()
                     ->label('Run `composer install --no-dev`')
                     ->default(false),
+                DynamicField::make('database_name')
+                    ->text()
+                    ->label('Database Name')
+                    ->placeholder('e.g. my_laravel_db')
+                    ->description('Optional. If provided, a database will be created automatically.'),
+                DynamicField::make('database_user_name')
+                    ->text()
+                    ->label('Database User')
+                    ->placeholder('e.g. my_laravel_user')
+                    ->description('Required if database name is provided.'),
+                DynamicField::make('database_user_password')
+                    ->password()
+                    ->label('Database Password')
+                    ->description('Required if database name is provided. Minimum 6 characters.'),
             ]))
             ->register();
         RegisterSiteFeature::make(Laravel::id(), 'modern-deployment')

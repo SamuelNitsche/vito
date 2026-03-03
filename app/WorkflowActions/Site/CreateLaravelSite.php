@@ -14,6 +14,9 @@ class CreateLaravelSite extends CreateSite
             'branch' => 'Branch to deploy, example: main',
             'web_directory' => 'public',
             'composer' => 'whether to run composer install (true/false, optional)',
+            'database_name' => 'Database name to create (optional)',
+            'database_user_name' => 'Database username to create (required if database_name is provided)',
+            'database_user_password' => 'Database user password (required if database_name is provided, min 6 chars)',
         ]);
     }
 }
